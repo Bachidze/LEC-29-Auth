@@ -7,12 +7,13 @@ export class AuthGuard implements CanActivate{
     constructor(private jwtService:JwtService){}
    async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest()
-        console.log(request.headers)
         const token = this.getToken(request.headers)
         if(!token) throw new BadRequestException()
         try {
             const payLoad  = this.jwtService.verify(token)
             request.userId  = payLoad.userId
+            request.role = payLoad.role
+            console.log(request.role)
         } catch (error) {
             throw new BadRequestException()
         }

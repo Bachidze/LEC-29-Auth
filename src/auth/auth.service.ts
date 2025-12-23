@@ -24,8 +24,9 @@ export class AuthService {
         if(!isPassEqual) throw new BadGatewayException("invalid Credentials")
 
           const payLoad = {
-            userId:exsistingUser._id
-        } 
+            userId:exsistingUser._id,
+            role:exsistingUser.role
+        }
         const accessToken = await this.jwtService.sign(payLoad,{expiresIn:"1h"})
         return {accessToken}
     }

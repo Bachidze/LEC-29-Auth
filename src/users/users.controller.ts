@@ -3,15 +3,17 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/auth/guards/atuh.guard';
+import { User } from 'src/decorators/user.decorator';
+import { IsAdminGuard } from 'src/auth/guards/isAdmin.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
+  // @Post()
+  // create(@Body() createUserDto: CreateUserDto) {
+  //   return this.usersService.create(createUserDto);
+  // }
 
   @Get()
   findAll() {
@@ -23,15 +25,21 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  @UseGuards(AuthGuard)
+  @Patch()
+  update(@User() userId, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(userId, updateUserDto);
   }
 
   @UseGuards(AuthGuard)
   @Delete()
-  remove(@Req() request) {
-    const userId = request.userId
+  remove(@User() userId) {
     return this.usersService.remove(userId);
+  }
+
+  @Delete(":id")
+  @UseGuards(AuthGuard,IsAdminGuard)
+  removeOtherUser(@Param("id") id){
+    return this.usersService.remove(id)
   }
 }
