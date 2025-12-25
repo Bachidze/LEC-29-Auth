@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -7,7 +7,11 @@ import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class PostsService {
-  constructor(@InjectModel("post") private postsModel:Model<any>,private usersService:UsersService){}
+  constructor(
+  @InjectModel("post") private postsModel:Model<any>,
+  @Inject(forwardRef(() => UsersService))
+  private usersService:UsersService
+){}
 
  async create(userId,createPostDto: CreatePostDto) {
     const newPost = await this.postsModel.create({...createPostDto,user:userId})
@@ -32,5 +36,9 @@ async findOne(id: string) {
 async  remove(id: string) {
     const deletedUser = await this.postsModel.findByIdAndDelete(id)
     return deletedUser
+  }
+
+  async PostByUserId(id){
+    await this.postsModel.deleteMany({user:id})
   }
 }
